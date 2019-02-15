@@ -1,47 +1,56 @@
 <?php
 require_once 'Renderer.php';
 require_once 'GameObject.php';
+require_once 'Game.php';
 
 class GameApp
 {
-    public $board_width;
-    public $board_height;
-    public $cell_size = '40px';
-    public $objects;
-
+    private $game;
     private $renderer;
 
-    function __construct($config_json)
+    public function __construct()
     {
+        IW::do()->say("constructing...");
+        $this->game = new Game();
+        $this->readInitialConfig();
+    }
+
+    public function readInitialConfig()
+    {
+        $config_json = file_get_contents("config.json");
+        IW::do()->say($config_json);
         try {
             $args = $this->readParameters($config_json);
 
         } catch (\Throwable $th) {
-            echo "Bad config file";
+            IW::do()->say("Error parsing config file");
         }
 
-        echo "config array:<br/>";
-        print_r($args);
-        echo "<br/><br/>initialized!!<br/><br/>";
-    }
+        IW::do()->say("config array:<br/>");
 
-    public function render()
-    {
-        $this->renderer = new Renderer($this);
+        if(isset($args))
+            IW::do()->say($args);
+
+        IW::do()->say("initialized!!");
     }
 
     private function readParameters($config_json)
     {
         $args = $this->parseJson($config_json);
 
-        $this->board_height = $args->board_height;
-        $this->board_width = $args->board_width;
+        IW::do()->say($args);
+        var_dump($args);
+        $this->game->board_height = $args->board_height;
+        $this->game->board_width = $args->board_width;
 
-        if(isset($args->objects))
-            foreach ($args->objects as $object)
-            {
-                $this->addObject($this->parseObject($object));
-            }
+        IW::do()->say($args->objects);
+        if( isset($args->objects) )
+        foreach ($args->objects as $object)
+        {
+            IW::do()->say($object);
+
+            $this->game->addObject($this->parseObject($object));
+        }
 
         return $args;
     }
@@ -70,8 +79,9 @@ class GameApp
         return $game_object;
 
     }
-    private function addObject(GameObject $object)
+
+    public function render()
     {
-        $this->objects[] = $object;
+        $this->renderer = new Renderer($this->game);
     }
 }

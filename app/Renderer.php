@@ -9,6 +9,11 @@ class Renderer
     {
         $this->game = $game;
 
+        if($this->game === null)
+        {
+            throw new Exception("Renderer cannot render 'null'.");
+        }
+
         $this->renderHead();
 
         $this->renderCSS();
@@ -22,8 +27,9 @@ class Renderer
 
     private function prepareObjects()
     {
-        if( isset($this->game->objects) )
-        foreach ($this->game->objects as $key => $object)
+        $objects = $this->game->getObjects();
+        if($objects !== null)
+        foreach ($objects as $key => $object)
         {
             $this->objects_on_board[$object->x][$object->y][] = $key;
         }
@@ -31,9 +37,9 @@ class Renderer
 
     private function renderBoard(){
         echo '<div id="board">';
-        for ($y = 0; $y < $this->game->board_width; $y++) {
+        for ($y = 0; $y < $this->game->boardWidth(); $y++) {
             echo '<div class="row row-' . $y . '">';
-            for ($x = 0; $x < $this->game->board_height; $x++) {
+            for ($x = 0; $x < $this->game->boardHeight(); $x++) {
                 echo '<div class="col col-' . $x . '" ><div class="cell cell-' . $x . '-' . $y . '">';
                 $this->renderObjects($x, $y);
                 echo '</div></div>';
